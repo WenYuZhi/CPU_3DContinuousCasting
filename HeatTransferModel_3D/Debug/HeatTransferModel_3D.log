@@ -1,0 +1,12 @@
+﻿  HeatTransferModel_3D.cpp
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(13): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(18): warning C4838: 从“double”转换到“float”需要收缩转换
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(18): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(19): warning C4838: 从“double”转换到“float”需要收缩转换
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(19): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(23): warning C4305: “初始化”: 从“double”到“float”截断
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(410): warning C4244: “=”: 从“double”转换到“clock_t”，可能丢失数据
+c:\users\administrator\desktop\my paper\pid one step prediction\传热模型c语言备份\3d_copy\heattransfermodel_3dv2\heattransfermodel_3d\heattransfermodel_3d.cpp(470): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: 参见“fopen”的声明
+  HeatTransferModel_3D.vcxproj -> C:\Users\Administrator\Desktop\My paper\PID one step Prediction\传热模型C语言备份\3D_Copy\HeatTransferModel_3DV2\Debug\HeatTransferModel_3D.exe
+  HeatTransferModel_3D.vcxproj -> C:\Users\Administrator\Desktop\My paper\PID one step Prediction\传热模型C语言备份\3D_Copy\HeatTransferModel_3DV2\Debug\HeatTransferModel_3D.pdb (Full PDB)

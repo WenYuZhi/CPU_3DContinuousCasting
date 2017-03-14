@@ -4,6 +4,7 @@
 #include "time.h"
 #include "stdio.h"
 #include "math.h"
+#include <stdlib.h>
 void Physicial_Parameters(float T);
 float Boundary_Condition(int j, int ny, float Ly, float *, float *);
 void OutputTemperature(int nx, int ny, int nz, int tnpts, int inter_num);
@@ -18,7 +19,7 @@ int main()
 	float H_Init[Section] = { 1380.0, 1170.0, 980.0, 800.0, 1223.16, 735.05, 424.32, 392.83, 328.94, 281.64, 246.16, 160.96 };
 	float ccml[Section + 1] = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0925, 2.27, 4.29, 5.831, 9.6065, 13.6090, 19.87014, 28.599 };
 	float T_SumZone[CoolSection][3001] = {};
-	float y[3001];
+	float *y;
 	int nx = 21, ny = 3001, nz = 21, tnpts = 10001;
 	float Lx = 0.25, Ly = 28.599, Lz = 0.25, dx, dy, dz, t_final = 2000.0, tao, T_Cast = 1558, Tw = 30.0, T_Up, T_Down, T_Right, T_Left, T_Forw, T_Back;
 	int inter_num = 500, count = 0;
@@ -29,6 +30,8 @@ int main()
 	dy = Ly / (ny - 1);
 	dz = Lz / (nz - 1);
 	tao = t_final / (tnpts - 1);
+
+	y = (float*)calloc(ny, sizeof(float));
 
 	for (int j = 0; j < ny; j++)
 		y[j] = j*dy;
@@ -485,106 +488,4 @@ void OutputTemperature(int nx, int ny, int nz, int tnpts, int inter_num)
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
-
-	/*fp = fopen("C:\\Temperature3Dxyn.txt", "w");
-	m = nz - 1;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (j = 0; j < ny; j++)
-		{
-			for (i = 0; i < nx; i++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	fp = fopen("C:\\Temperature3Dxy1.txt", "w");
-	m = 0;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (j = 0; j < ny; j++)
-		{
-			for (i = 0; i < nx; i++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	fp = fopen("C:\\Temperature3Dyzn.txt", "w");
-	i = nx - 1;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (j = 0; j < ny; j++)
-		{
-			for (m = 0; m < nz; m++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	fp = fopen("C:\\Temperature3Dyz1.txt", "w");
-	i = 0;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (j = 0; j < ny; j++)
-		{
-			for (m = 0; m < nz; m++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	fp = fopen("C:\\Temperature3Dxzn.txt", "w");
-	j = ny - 1;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (i = 0; i < nx; i++)
-		{
-			for (m = 0; m < nz; m++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);
-
-	fp = fopen("C:\\Temperature3Dxz1.txt", "w");
-	j = 0;
-	for (k = 0; k < tnpts - 1; k++)
-	{
-		for (i = 0; i < nx; i++)
-		{
-			for (m = 0; m < nz; m++)
-			{
-				fprintf(fp, " %f", T[i][j][m][k]);
-				fprintf(fp, " %d, %d, %d,", i, j, m);
-			}
-			fprintf(fp, "\n");
-		}
-		fprintf(fp, "\n");
-	}
-	fclose(fp);*/
 }

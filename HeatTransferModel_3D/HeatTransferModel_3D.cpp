@@ -25,8 +25,8 @@ struct physicalpara
 physicalpara Physicial_Parameters(float T);
 float Boundary_Condition(int j, int ny, float Ly, float *, float *);
 Meantemperature Calculation_MeanTemperature(int nx, int ny, int nz, float dy, float *ccml, float ***T);
-void differencecalculation(float ***T_New, float ***T_Last, int nx, int ny, int nz, float Ly, float dx, float dy, float dz, float tao, float *ccml, float T_Cast, float *H_Init, float Vcast, int pstep, int disout);
-
+void differencecalculation(float ***T_New, float ***T_Last, int nx, int ny, int nz, float Ly, float dx, float dy, float dz, float tao, float *ccml, float T_Cast, float *H_Init, float Vcast, int pstep, bool & disout);
+void initcondition(float***T_Last, int nx, int ny, int nz, float T_Cast, bool & disout);
 
 int main()
 {
@@ -35,7 +35,8 @@ int main()
 	float ccml[Section + 1] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0925f, 2.27f, 4.29f, 5.831f, 9.6065f, 13.6090f, 19.87014f, 28.599f };
 	const int nx = 31, ny = 3000, nz = 31, tnpts = 10001;
 	float Lx = 0.25f, Ly = 28.599f, Lz = 0.25f, dx, dy, dz, t_final = 2000.0f, tao, T_Cast = 1558.0f, Vcast = -0.02f;
-	int inter_num = 2000, count = 0, disout = 1;
+	int inter_num = 100, count = 0;
+	bool disout = true;
 	clock_t begin, duration;
 
 	begin = clock();
@@ -59,11 +60,7 @@ int main()
 			T_Last[i][j] = new float[nz];
 	}
 
-	for (int i = 0; i < nx; i++)
-		for (int j = 0; j < ny; j++)
-			for (int m = 0; m < nz; m++)
-				 T_Last[i][j][m] = T_Cast;
-	
+
 	cout << "Casting Temperature " << T_Cast << endl;
 	cout << "The length of steel billets(m) " << Ly << endl;
 	cout << "The width of steel billets(m) " << Lz << endl;
@@ -75,6 +72,7 @@ int main()
 	cout << "simulation time(s) " << t_final << endl;
 	
 	int pstep = 1;
+	initcondition(T_Last, nx, ny, nz, T_Cast, disout);
 	for (int k = 0; k < tnpts - 1; k++)
 	{
 		differencecalculation(T_New, T_Last, nx, ny, nz, Ly, dx, dy, dz, tao, ccml, T_Cast, H_Init, Vcast, pstep, disout);
@@ -187,10 +185,10 @@ Meantemperature Calculation_MeanTemperature(int nx, int ny, int nz, float dy, fl
 	return meantemperature;
 }
 
-void differencecalculation(float ***T_New, float ***T_Last, int nx, int ny, int nz, float Ly, float dx, float dy, float dz, float tao, float *ccml, float T_Cast, float *H_Init, float Vcast, int pstep, int disout)
+void differencecalculation(float ***T_New, float ***T_Last, int nx, int ny, int nz, float Ly, float dx, float dy, float dz, float tao, float *ccml, float T_Cast, float *H_Init, float Vcast, int pstep, bool & disout)
 {
 	float T_Up, T_Down, T_Right, T_Left, T_Forw, T_Back, a, Tw = 30.0f, h;
-	for (int p = 0; p < pstep; p++)
+	if(disout)
 	{
 		for (int j = 0; j < ny; j++)
 		{
@@ -479,10 +477,306 @@ void differencecalculation(float ***T_New, float ***T_Last, int nx, int ny, int 
 					}
 				}
 		}
-
-		for (int i = 0; i < nx; i++)
-			for (int j = 0; j < ny; j++)
-				for (int m = 0; m < nz; m++)
-					T_Last[i][j][m] = T_New[i][j][m];
 	}
+
+	else
+		{
+			for (int j = 0; j < ny; j++)
+			{
+				h = Boundary_Condition(j, ny, Ly, ccml, H_Init);
+				for (int i = 0; i < nx; i++)
+					for (int m = 0; m < nz; m++)
+					{
+						physicalpara steel = Physicial_Parameters(T_New[i][j][m]);
+						a = steel.lamd / (steel.pho * steel.Ce);
+						if (j == 0 && i != 0 && i != (nx - 1) && m != 0 && m != (nz - 1)) //1
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == 0 && m != 0 && m != (nz - 1)) //2
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == (nx - 1) && m != 0 && m != (nz - 1))//3
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i != 0 && i != (nx - 1) && m == 0) //4
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i != 0 && i != (nx - 1) && m == (nz - 1)) //5
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == 0 && m == 0)  //6
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == 0 && m == (nz - 1))  //7
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == (nx - 1) && m == 0)  //8
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == 0 && i == (nx - 1) && m == (nz - 1)) //9
+						{
+							T_Last[i][j][m] = T_Cast;
+						}
+
+						else if (j == (ny - 1) && i != 0 && i != (nx - 1) && m != 0 && m != (nz - 1)) //10
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = (a*tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ (a*tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == 0 && m != 0 && m != (nz - 1)) //11
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == (nx - 1) && m != 0 && m != (nz - 1)) //12
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i != 0 && i != (nx - 1) && m == 0)  //13
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i != 0 && i != (nx - 1) && m == (nz - 1))  //14
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == 0 && m == 0)  //15
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == 0 && m == (nz - 1))  //16
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == (nx - 1) && m == 0)  //17
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j == (ny - 1) && i == (nx - 1) && m == (nz - 1))  //18
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j - 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i != 0 && i != (nx - 1) && m == 0)  //19
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i != 0 && i != (nx - 1) && m == (nz - 1))  //20
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1] - 2 * dz*h*(T_New[i][j][m] - Tw) / steel.lamd;
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == 0 && m == 0) //21
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == (nx - 1) && m == 0)  //22
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m + 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == 0 && m == (nz - 1)) //23
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == (nx - 1) && m == (nz - 1)) //24
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m - 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == 0 && m != 0 && m != (nz - 1))  //25
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i + 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else if (j != 0 && j != (ny - 1) && i == (nx - 1) && m != 0 && m != (nz - 1)) //26
+						{
+							//T[i][j][m][k + 1] = T_Cast;
+							T_Up = T_New[i - 1][j][m] - 2 * dx * h * (T_New[i][j][m] - Tw) / steel.lamd;
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+
+						else  //27
+						{
+							T_Up = T_New[i + 1][j][m];
+							T_Down = T_New[i - 1][j][m];
+							T_Right = T_New[i][j + 1][m];
+							T_Left = T_New[i][j - 1][m];
+							T_Forw = T_New[i][j][m + 1];
+							T_Back = T_New[i][j][m - 1];
+							T_Last[i][j][m] = a*(tao / (dx*dx))*T_Up + a*(tao / (dx*dx))*T_Down + ((1 - 2 * a*tao / (dx*dx) - 2 * a*tao / (dy*dy) - 2 * a*tao / (dz*dz) + tao*Vcast / dy))*T_New[i][j][m]
+								+ a*(tao / (dy*dy))*T_Right + (a*tao / (dy*dy) - tao*Vcast / dy)*T_Left + (a*tao / (dz*dz))*T_Forw + (a*tao / (dz*dz))*T_Back;
+						}
+					}
+			}
+		}
+		disout = !disout;
+}
+
+void initcondition(float***T_Last, int nx, int ny, int nz, float T_Cast, bool & disout)
+{
+	disout = true;
+	for (int i = 0; i < nx; i++)
+		for (int j = 0; j < ny; j++)
+			for (int m = 0; m < nz; m++)
+				T_Last[i][j][m] = T_Cast;
 }

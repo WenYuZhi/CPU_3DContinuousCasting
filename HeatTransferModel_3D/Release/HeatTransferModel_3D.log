@@ -1,17 +1,7 @@
-﻿生成启动时间为 2017/7/25 14:30:37。
-     1>项目“D:\GPU_SolverPDEs\CPU_3DContinuousCasting\HeatTransferModel_3D\HeatTransferModel_3D.vcxproj”在节点 2 上(Rebuild 个目标)。
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.10150.0\ucrt" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Release\\" /Fd"Release\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt HeatTransferModel_3D.cpp
-         HeatTransferModel_3D.cpp
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(81): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(91): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(101): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(112): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(147): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\iostream(150): error C2803: “operator <<”必须至少有一个类类型的形参
-     1>HeatTransferModel_3D.cpp(388): warning C4244: “=”: 从“double”转换到“clock_t”，可能丢失数据
-     1>已完成生成项目“D:\GPU_SolverPDEs\CPU_3DContinuousCasting\HeatTransferModel_3D\HeatTransferModel_3D.vcxproj”(Rebuild 个目标)的操作 - 失败。
-
-生成失败。
-
-已用时间 00:00:00.20
+﻿  HeatTransferModel_3D.cpp
+HeatTransferModel_3D.cpp(91): warning C4244: “=”: 从“double”转换到“clock_t”，可能丢失数据
+  正在生成代码
+  All 17 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  HeatTransferModel_3D.vcxproj -> C:\Users\Administrator\Desktop\My paper\CUDA\GPU_SolverPDEs\CPU_3DContinuousCasting\Release\HeatTransferModel_3D.exe
+  HeatTransferModel_3D.vcxproj -> C:\Users\Administrator\Desktop\My paper\CUDA\GPU_SolverPDEs\CPU_3DContinuousCasting\Release\HeatTransferModel_3D.pdb (Full PDB)
